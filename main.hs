@@ -35,5 +35,5 @@ main = do
     contents <- readFile fileName
     putStrLn ""
     putStrLn "Vysledek hledani ve formatu (koncovy_index, slovo):"
-    mapM_ print (performSearch (makeBackEdges t) contents)
+    mapM_ print (performSearch (toACTrie t) contents)
     getLine

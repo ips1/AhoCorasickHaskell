@@ -6,24 +6,6 @@ setEdge :: Trie -> Trie -> Trie
 setEdge n (Node t s _) = Node t s n
 
 
--- Returns a node where the word ends
-findNode :: Trie -> String -> Maybe Trie
-findNode n [] = Just n
-findNode (Node _ s _) (x:xs) = case (Map.lookup x s) of (Just k) -> findNode k xs
-                                                        (Nothing) -> Nothing
-
--- Converts the trie into a list
-toList :: Trie -> [String]
-toList (Node [] s _) = foldr (++) [] (map (dfs "") (Map.toList s))
-toList (Node _ s _) = []:(foldr (++) [] (map (dfs "") (Map.toList s)))
-
-dfs :: String -> (Char, Trie) -> [String]
-dfs acc (c, (Node [] s _)) = (foldr (++) [] (map (dfs acc2) (Map.toList s)))
-  where acc2 = c:acc
-dfs acc (c, (Node _ s _)) = (reverse acc2):(foldr (++) [] (map (dfs acc2) (Map.toList s)))
-  where acc2 = c:acc
-
-
 -- Replaces a node with a new one
 replaceNode	:: Trie -> String -> Trie -> Trie
 replaceNode n [] n1 = n1
