@@ -1,4 +1,4 @@
-module AhoCorasick (Trie(..), fromList, addString, empty, follow, followBack, isRoot, performSearch, toACTrie) where   
+module AhoCorasick (ACTrie, performSearch, toACTrie) where   
 
 import qualified Data.Map as Map
 import Trie
