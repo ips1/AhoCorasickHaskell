@@ -9,8 +9,8 @@ data Trie = Node String (Map.Map Char Trie) deriving (Show)
 -- Updates the list of children during addition
 -- takes map of children, character identifiing new branch, whole word and the rest of the word
 updateChildren :: Map.Map Char Trie -> Char -> String -> String -> Map.Map Char Trie
-updateChildren m x word xs = let elem = Map.member x m
-                                 m1 = if not elem then Map.insert x (addString' (Node [] Map.empty) word xs) m
+updateChildren m x word xs = let elem' = Map.member x m
+                                 m1 = if not elem' then Map.insert x (addString' (Node [] Map.empty) word xs) m
                                                        -- if the character isn't in the map, we insert a new trie with the rest of the word
                                                   else Map.update (\trie -> Just (addString' trie word xs)) x m
                                                        -- if there is already a branch with that character, we just update the trie

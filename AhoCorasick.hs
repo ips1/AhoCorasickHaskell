@@ -1,4 +1,4 @@
-module AhoCorasick (ACTrie, performSearch, toACTrie) where   
+module AhoCorasick (ACTrie, performSearch, toACTrie, isFinal) where
 
 import qualified Data.Map as Map
 import Data.Maybe
@@ -38,22 +38,22 @@ toACTrie t = nt
 -- supposed to be called with return value as the second argument - creates recursive structure
 -- due to a lazy evaluation
 construct :: Trie -> ACTrie -> ACTrie
-construct (Node t s) new = ACNode [] (Map.mapWithKey (dfsSet new) s) None
+construct (Node _ s) new = ACNode [] (Map.mapWithKey (dfsSet new) s) None
 
 -- Takes a father node, son node and an according character
 -- creates a back edge from the son, list of strings to report in the son
 -- and calls itself on all the children of the son
 dfsSet :: ACTrie -> Char -> Trie -> ACTrie
 dfsSet father c (Node t m) = newNode
-  where newNode = ACNode words m1 (firstEdge father)
-        words = if null t then collectStrings (firstEdge father) else t:collectStrings (firstEdge father)
-        firstEdge father | isRoot father = father
-                         | otherwise = findBackEdge (followBack father) c
+  where newNode = ACNode words' m1 (firstEdge father)
+        words' = if null t then collectStrings (firstEdge father) else t:collectStrings (firstEdge father)
+        firstEdge father' | isRoot father' = father'
+                          | otherwise = findBackEdge (followBack father') c
         m1 = Map.mapWithKey (dfsSet newNode) m
 
 -- Finds a back edge for a father node and a character
 findBackEdge :: ACTrie -> Char -> ACTrie
-findBackEdge root@(ACNode t s None) c = fromMaybe root (follow root c)
+findBackEdge root@(ACNode _ _ None) c = fromMaybe root (follow root c)
 findBackEdge node c = fromMaybe (findBackEdge (followBack node) c) (follow node c)
 
 -- The node has some words to report
@@ -64,7 +64,7 @@ isFinal None = False
 -- Collects the words from a node
 collectStrings :: ACTrie -> [String]
 collectStrings (ACNode _ _ None) = []
-collectStrings (ACNode t s b) = t
+collectStrings (ACNode t _ _) = t
 collectStrings None = []
 
 
@@ -81,10 +81,10 @@ ahoStep node c = fromMaybe
 -- Main search function, accumulates the results
 -- aho trie sourceText positionInText accumulatedResults  
 aho :: ACTrie -> String -> Int -> [(Int, String)] -> [(Int, String)]
-aho (ACNode words _ _) [] n found = found ++ map (\word -> (n, word)) words    -- The source text is exhausted, we return the accumulator
-aho node@(ACNode words _ _) (x:xs) n found = aho newNode xs (n+1) newFound
+aho (ACNode words' _ _) [] n found = found ++ map (\word -> (n, word)) words'    -- The source text is exhausted, we return the accumulator
+aho node@(ACNode words' _ _) (x:xs) n found = aho newNode xs (n+1) newFound
   where newNode = ahoStep node x   -- One step in the trie
-        newFound = found ++ map (\word -> (n, word)) words  -- Record all the matches in current position
+        newFound = found ++ map (\word -> (n, word)) words'  -- Record all the matches in current position
 aho None _ _ _ = error "Shouldn't happen!"
 
 -- Searches for the patterns in trie in given string
