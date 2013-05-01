@@ -1,4 +1,4 @@
-module Trie (Trie(..), fromList, addString, empty) where
+module Trie (Trie(..), fromList, addString, empty, findNode, toList, dfs) where
 
 import qualified Data.Map as Map
 

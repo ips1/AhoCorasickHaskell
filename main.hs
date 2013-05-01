@@ -4,6 +4,7 @@ import AhoCorasick
 import System.Exit
 import System.Directory  
 import System.IO
+import Trie
 
 ins :: Trie -> IO Trie
 ins t = do
