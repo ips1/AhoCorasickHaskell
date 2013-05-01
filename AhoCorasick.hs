@@ -1,6 +1,7 @@
 module AhoCorasick (ACTrie, performSearch, toACTrie) where   
 
 import qualified Data.Map as Map
+import Data.Maybe
 import Trie
 
 
@@ -45,17 +46,15 @@ construct (Node t s) new = ACNode [] (Map.mapWithKey (dfsSet new) s) None
 dfsSet :: ACTrie -> Char -> Trie -> ACTrie
 dfsSet father c (Node t m) = newNode
   where newNode = ACNode words m1 (firstEdge father)
-        words = if null t then collectStrings (firstEdge father) else (t:(collectStrings (firstEdge father)))
+        words = if null t then collectStrings (firstEdge father) else t:collectStrings (firstEdge father)
         firstEdge father | isRoot father = father
                          | otherwise = findBackEdge (followBack father) c
         m1 = Map.mapWithKey (dfsSet newNode) m
 
 -- Finds a back edge for a father node and a character
 findBackEdge :: ACTrie -> Char -> ACTrie
-findBackEdge root@(ACNode t s None) c = case follow root c of Just k -> k
-                                                              Nothing -> root
-findBackEdge node c = case follow node c of Just k -> k
-                                            Nothing -> findBackEdge (followBack node) c
+findBackEdge root@(ACNode t s None) c = fromMaybe root (follow root c)
+findBackEdge node c = fromMaybe (findBackEdge (followBack node) c) (follow node c)
 
 -- The node has some words to report
 isFinal :: ACTrie -> Bool
@@ -73,17 +72,19 @@ collectStrings None = []
 -- AHO-CORASICK ALGORITHM --
 -- One step of the search algorithm
 ahoStep :: ACTrie -> Char -> ACTrie
-ahoStep node c = case follow node c of Just k -> k     -- We can extend the match in current branch of trie
-                                       Nothing -> if isRoot node then node   -- We follow the back edge to the root
-                                                  else ahoStep (followBack node) c  -- We follow the back edge somewhere else
+ahoStep node c = fromMaybe
+    (if isRoot node
+        then node  -- We follow the back edge to the root
+        else ahoStep (followBack node) c)  -- We follow the back edge somewhere else
+    (follow node c)  -- We can extend the match in current branch of trie
 
 -- Main search function, accumulates the results
 -- aho trie sourceText positionInText accumulatedResults  
 aho :: ACTrie -> String -> Int -> [(Int, String)] -> [(Int, String)]
-aho (ACNode words _ _) [] n found = found ++ (map (\word -> (n, word)) words)    -- The source text is exhausted, we return the accumulator
+aho (ACNode words _ _) [] n found = found ++ map (\word -> (n, word)) words    -- The source text is exhausted, we return the accumulator
 aho node@(ACNode words _ _) (x:xs) n found = aho newNode xs (n+1) newFound
   where newNode = ahoStep node x   -- One step in the trie
-        newFound = found ++ (map (\word -> (n, word)) words)  -- Record all the matches in current position
+        newFound = found ++ map (\word -> (n, word)) words  -- Record all the matches in current position
 aho None _ _ _ = error "Shouldn't happen!"
 
 -- Searches for the patterns in trie in given string
