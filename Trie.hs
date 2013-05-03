@@ -1,18 +1,19 @@
-module Trie (Trie(..), fromList, addString, empty, findNode, toList, dfs) where
+module Trie (Trie(..), fromList, addString, empty) where
 
 import qualified Data.Map as Map
 
--- Node consists of ending mark (word ends here), list of children and a back edge
+-- Data structure for representing the trie
+-- Node consists of ending mark (word ends here) and list of children
 data Trie = Node String (Map.Map Char Trie) deriving (Show)
 
 
 -- Updates the list of children during addition
 -- takes map of children, character identifiing new branch, whole word and the rest of the word
 updateChildren :: (Map.Map Char Trie) -> Char -> String -> String -> (Map.Map Char Trie)
-updateChildren m x word xs = let elem = Map.member x m
-                                 m1 = if (not elem) then Map.insert x (addString' (Node [] Map.empty) word xs) m
+updateChildren m x word xs = let isElem = Map.member x m
+                                 m1 = if (not isElem) then Map.insert x (addString' (Node [] Map.empty) word xs) m
                                                        -- if the character isn't in the map, we insert a new trie with the rest of the word
-                                                    else Map.update (\trie -> Just (addString' trie word xs)) x m
+                                                      else Map.update (\trie -> Just (addString' trie word xs)) x m
                                                        -- if there is already a branch with that character, we just update the trie
                              in m1
 
@@ -39,19 +40,3 @@ empty :: Trie
 empty = Node [] Map.empty
 
 
--- Returns a node where the word ends
-findNode :: Trie -> String -> Maybe Trie
-findNode n [] = Just n
-findNode (Node _ s) (x:xs) = case (Map.lookup x s) of (Just k) -> findNode k xs
-                                                      (Nothing) -> Nothing
-
--- Converts the trie into a list
-toList :: Trie -> [String]
-toList (Node [] s) = foldr (++) [] (map (dfs "") (Map.toList s))
-toList (Node _ s) = []:(foldr (++) [] (map (dfs "") (Map.toList s)))
-
-dfs :: String -> (Char, Trie) -> [String]
-dfs acc (c, (Node [] s)) = (foldr (++) [] (map (dfs acc2) (Map.toList s)))
-  where acc2 = c:acc
-dfs acc (c, (Node _ s)) = (reverse acc2):(foldr (++) [] (map (dfs acc2) (Map.toList s)))
-  where acc2 = c:acc

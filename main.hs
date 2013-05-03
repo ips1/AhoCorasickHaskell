@@ -1,10 +1,8 @@
 module Main where
 
 import AhoCorasick
-import System.Exit
-import System.Directory  
-import System.IO
 import Trie
+import System.Directory  
 
 ins :: Trie -> IO Trie
 ins t = do
@@ -24,6 +22,7 @@ promptFile = do
               putStrLn ""
               promptFile  
 
+main :: IO ()
 main = do
     putStrLn ""
     putStrLn "----------------------"
@@ -37,4 +36,5 @@ main = do
     putStrLn ""
     putStrLn "Vysledek hledani ve formatu (koncovy_index, slovo):"
     mapM_ print (performSearch (toACTrie t) contents)
-    getLine
+    _ <- getLine
+    return ()
