@@ -1,8 +1,8 @@
 module Main where
 
 import AhoCorasick
-import System.Directory  
 import Trie
+import System.Directory  
 
 ins :: Trie -> IO Trie
 ins t = do
