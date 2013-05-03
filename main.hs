@@ -2,7 +2,7 @@ module Main where
 
 import AhoCorasick
 import Trie
-import System.Directory  
+import System.Directory
 
 ins :: Trie -> IO Trie
 ins t = do

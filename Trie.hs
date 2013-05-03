@@ -12,10 +12,10 @@ data Trie = Node String (Map.Map Char Trie) deriving (Show)
 updateChildren :: Map.Map Char Trie -> Char -> String -> String -> Map.Map Char Trie
 updateChildren m x word xs =
     let isElem = Map.member x m
-    in if (not isElem) then Map.insert x (addString' (Node [] Map.empty) word xs) m
-                       -- if the character isn't in the map, we insert a new trie with the rest of the word
-                       else Map.update (\trie -> Just (addString' trie word xs)) x m
-                       -- if there is already a branch with that character, we just update the trie
+    in if not isElem then Map.insert x (addString' (Node [] Map.empty) word xs) m
+                     -- if the character isn't in the map, we insert a new trie with the rest of the word
+                     else Map.update (\trie -> Just (addString' trie word xs)) x m
+                     -- if there is already a branch with that character, we just update the trie
 
 
 -- Adds string into a trie
